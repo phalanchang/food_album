@@ -12,9 +12,9 @@
 - [x] CLAUDE.md 作成（セッション継続性確保）
 - [x] .gitignore, .env.example 作成
 - [x] スプリント管理ディレクトリ作成
-- [ ] 要件定義ドキュメントをリポジトリに移動
-- [ ] main ブランチに初期コミット
-- [ ] docker compose up --build で動作確認
+- [x] 要件定義ドキュメントをリポジトリに移動
+- [x] main ブランチに初期コミット
+- [x] docker compose up --build で動作確認
 
 ## 完了条件
 - `docker compose up --build` が成功する
