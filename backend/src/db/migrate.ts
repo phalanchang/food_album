@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { pool, query } from "./client.js";
 
 async function migrate() {
@@ -11,7 +12,8 @@ async function migrate() {
     )
   `);
 
-  const migrationsDir = path.join(import.meta.dirname, "migrations");
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const migrationsDir = path.join(__dirname, "migrations");
   const files = fs.readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
 
   for (const file of files) {
