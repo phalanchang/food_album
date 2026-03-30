@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, PlusCircle, User } from "lucide-react";
+import { Home, Calendar, PlusCircle, BarChart3 } from "lucide-react";
 
 const tabs = [
   { label: "ホーム", icon: Home, href: "/" },
   { label: "カレンダー", icon: Calendar, href: "/calendar" },
   { label: "投稿", icon: PlusCircle, href: "/meals/new" },
-  { label: "マイページ", icon: User, href: "#" },
+  { label: "振り返り", icon: BarChart3, href: "/summary" },
 ];
 
 export default function BottomNav() {

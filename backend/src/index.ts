@@ -7,6 +7,8 @@ import { logger } from "hono/logger";
 import { authRoute } from "./routes/auth.js";
 import { healthRoute } from "./routes/health.js";
 import { mealsRoute } from "./routes/meals.js";
+import { summariesRoute } from "./routes/summaries.js";
+import { recommendationsRoute } from "./routes/recommendations.js";
 
 fs.mkdirSync("/app/uploads", { recursive: true });
 
@@ -26,6 +28,8 @@ app.use("/uploads/*", serveStatic({ root: "/app" }));
 app.route("/api", healthRoute);
 app.route("/api/auth", authRoute);
 app.route("/api/meals", mealsRoute);
+app.route("/api/summaries", summariesRoute);
+app.route("/api/recommendations", recommendationsRoute);
 
 const port = Number(process.env.PORT) || 3005;
 
