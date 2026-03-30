@@ -76,4 +76,4 @@ food_album/
 - スプリント管理: `/sprints/` ディレクトリ参照
 
 ## Current Status
-Sprint 2 完了。詳細は `/sprints/sprint-2.md` を参照。
+Sprint 5 完了。詳細は `/sprints/sprint-5.md` を参照。
