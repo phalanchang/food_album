@@ -25,34 +25,46 @@ export interface SummaryResult {
   }>;
 }
 
+// JST (UTC+9) ベースで日付境界を計算
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+function toJSTDate(dateStr: string): Date {
+  // UTC の Date から JST の日付部分を取得するためにオフセット加算
+  return new Date(new Date(dateStr).getTime() + JST_OFFSET_MS);
+}
+
+function jstMidnightToUTC(year: number, month: number, day: number): Date {
+  // JST 00:00 = UTC 前日 15:00
+  return new Date(Date.UTC(year, month, day) - JST_OFFSET_MS);
+}
+
 export function getPeriodDates(
   period: string,
   dateStr: string
 ): { startDate: Date; endDate: Date } {
-  const date = new Date(dateStr);
+  const jst = toJSTDate(dateStr);
+  const y = jst.getUTCFullYear();
+  const m = jst.getUTCMonth();
+  const d = jst.getUTCDate();
 
   if (period === "daily") {
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
+    const start = jstMidnightToUTC(y, m, d);
+    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1);
     return { startDate: start, endDate: end };
   }
 
   if (period === "weekly") {
-    const day = date.getDay();
-    const start = new Date(date);
-    start.setDate(date.getDate() - ((day + 6) % 7)); // Monday
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6); // Sunday
-    end.setHours(23, 59, 59, 999);
+    const dayOfWeek = jst.getUTCDay();
+    const mondayOffset = (dayOfWeek + 6) % 7;
+    const start = jstMidnightToUTC(y, m, d - mondayOffset);
+    const end = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
     return { startDate: start, endDate: end };
   }
 
   // monthly
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+  const start = jstMidnightToUTC(y, m, 1);
+  const nextMonth = jstMidnightToUTC(y, m + 1, 1);
+  const end = new Date(nextMonth.getTime() - 1);
   return { startDate: start, endDate: end };
 }
 

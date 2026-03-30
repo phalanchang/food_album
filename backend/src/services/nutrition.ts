@@ -38,8 +38,11 @@ export async function evaluateNutrition(
   mealId: string,
   photoUrl: string
 ): Promise<void> {
+  console.log(`[Nutrition] Starting evaluation for meal ${mealId}, photo: ${photoUrl}`);
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
+    console.log(`[Nutrition] No API key set, skipping meal ${mealId}`);
     await query(
       `UPDATE meals SET nutrition_status = 'skipped' WHERE id = $1`,
       [mealId]
@@ -49,9 +52,11 @@ export async function evaluateNutrition(
 
   try {
     const filePath = path.join("/app", photoUrl);
+    console.log(`[Nutrition] Reading image file: ${filePath}`);
     const imageBuffer = await fs.readFile(filePath);
     const base64 = imageBuffer.toString("base64");
     const mediaType = getMediaType(photoUrl);
+    console.log(`[Nutrition] Sending to Claude API (${mediaType}, ${imageBuffer.length} bytes)`);
 
     const client = new Anthropic({ apiKey });
     const response = await client.messages.create({
@@ -81,6 +86,7 @@ export async function evaluateNutrition(
     }
 
     const result: NutritionResult = JSON.parse(textBlock.text);
+    console.log(`[Nutrition] Evaluation completed for meal ${mealId}:`, JSON.stringify(result));
 
     await query(
       `UPDATE meals
@@ -90,8 +96,9 @@ export async function evaluateNutrition(
        WHERE id = $2`,
       [JSON.stringify(result), mealId]
     );
+    console.log(`[Nutrition] Saved to DB for meal ${mealId}`);
   } catch (err) {
-    console.error(`Nutrition evaluation failed for meal ${mealId}:`, err);
+    console.error(`[Nutrition] Evaluation FAILED for meal ${mealId}:`, err);
     await query(
       `UPDATE meals SET nutrition_status = 'failed' WHERE id = $1`,
       [mealId]

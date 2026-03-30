@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { ArrowLeft, Trash2, Coffee, Sun, Moon, Cookie, Flame, Beef, Droplets, Wheat, Loader2 } from "lucide-react";
+import { ArrowLeft, Trash2, Coffee, Sun, Moon, Cookie, Flame, Beef, Droplets, Wheat, Loader2, Pencil, Check, X } from "lucide-react";
 import BottomNav from "../../components/bottom-nav";
 
 interface NutritionResult {
@@ -44,33 +44,96 @@ export default function MealDetailPage() {
   const [meal, setMeal] = useState<Meal | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ foods: "", calories: 0, protein: 0, fat: 0, carbs: 0, comment: "" });
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const fetchMeal = async () => {
+    try {
+      const res = await fetch(`/api/meals/${params.id}`, {
+        credentials: "include",
+      });
+      if (res.status === 401) {
+        router.push("/login");
+        return null;
+      }
+      if (res.status === 404) {
+        setError("記録が見つかりません");
+        setLoading(false);
+        return null;
+      }
+      const json = await res.json();
+      setMeal(json.data);
+      return json.data as Meal;
+    } catch {
+      setError("データの取得に失敗しました");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 初回取得 + pending時はポーリング
   useEffect(() => {
-    const fetchMeal = async () => {
-      try {
-        const res = await fetch(`/api/meals/${params.id}`, {
-          credentials: "include",
-        });
-        if (res.status === 401) {
-          router.push("/login");
-          return;
-        }
-        if (res.status === 404) {
-          setError("記録が見つかりません");
-          setLoading(false);
-          return;
-        }
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    fetchMeal().then((data) => {
+      if (data && data.nutrition_status === "pending") {
+        timer = setInterval(async () => {
+          const updated = await fetchMeal();
+          if (updated && updated.nutrition_status !== "pending") {
+            if (timer) clearInterval(timer);
+          }
+        }, 3000);
+      }
+    });
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [params.id]);
+
+  const startEditing = () => {
+    if (!meal?.nutrition_result) return;
+    setEditForm({
+      foods: meal.nutrition_result.foods.join("、"),
+      calories: meal.nutrition_result.calories,
+      protein: meal.nutrition_result.protein,
+      fat: meal.nutrition_result.fat,
+      carbs: meal.nutrition_result.carbs,
+      comment: meal.nutrition_result.comment || "",
+    });
+    setEditing(true);
+  };
+
+  const handleSaveNutrition = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/meals/${params.id}/nutrition`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          foods: editForm.foods.split(/[、,]/).map((s) => s.trim()).filter(Boolean),
+          calories: Number(editForm.calories),
+          protein: Number(editForm.protein),
+          fat: Number(editForm.fat),
+          carbs: Number(editForm.carbs),
+          comment: editForm.comment,
+        }),
+      });
+      if (res.ok) {
         const json = await res.json();
         setMeal(json.data);
-      } catch {
-        setError("データの取得に失敗しました");
-      } finally {
-        setLoading(false);
+        setEditing(false);
       }
-    };
-    fetchMeal();
-  }, [params.id, router]);
+    } catch {
+      setError("保存に失敗しました");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleDelete = async () => {
     if (!confirm("この食事記録を削除しますか？")) return;
@@ -164,9 +227,14 @@ export default function MealDetailPage() {
           栄養評価を分析中...
         </div>
       )}
-      {meal.nutrition_status === "completed" && meal.nutrition_result && (
+      {meal.nutrition_status === "completed" && meal.nutrition_result && !editing && (
         <div className="mt-4 bg-white rounded-lg shadow-sm p-4 space-y-3">
-          <h3 className="text-sm font-bold text-gray-700">AI 栄養評価</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-700">AI 栄養評価</h3>
+            <button onClick={startEditing} className="text-gray-400 hover:text-orange-500 transition-colors">
+              <Pencil className="w-4 h-4" />
+            </button>
+          </div>
           {meal.nutrition_result.foods.length > 0 && (
             <p className="text-sm text-gray-600">
               {meal.nutrition_result.foods.join("、")}
@@ -211,6 +279,61 @@ export default function MealDetailPage() {
               {meal.nutrition_result.comment}
             </p>
           )}
+        </div>
+      )}
+      {editing && (
+        <div className="mt-4 bg-white rounded-lg shadow-sm p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-700">栄養評価を編集</h3>
+            <div className="flex gap-2">
+              <button onClick={() => setEditing(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-4 h-4" />
+              </button>
+              <button onClick={handleSaveNutrition} disabled={saving} className="text-orange-500 hover:text-orange-600 disabled:opacity-50">
+                <Check className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">料理名（読点区切り）</label>
+            <input
+              type="text"
+              value={editForm.foods}
+              onChange={(e) => setEditForm({ ...editForm, foods: e.target.value })}
+              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">カロリー (kcal)</label>
+              <input type="number" value={editForm.calories} onChange={(e) => setEditForm({ ...editForm, calories: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">タンパク質 (g)</label>
+              <input type="number" step="0.1" value={editForm.protein} onChange={(e) => setEditForm({ ...editForm, protein: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">脂質 (g)</label>
+              <input type="number" step="0.1" value={editForm.fat} onChange={(e) => setEditForm({ ...editForm, fat: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">炭水化物 (g)</label>
+              <input type="number" step="0.1" value={editForm.carbs} onChange={(e) => setEditForm({ ...editForm, carbs: Number(e.target.value) })}
+                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">コメント</label>
+            <textarea
+              value={editForm.comment}
+              onChange={(e) => setEditForm({ ...editForm, comment: e.target.value })}
+              rows={2}
+              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
+            />
+          </div>
         </div>
       )}
       {meal.nutrition_status === "failed" && (

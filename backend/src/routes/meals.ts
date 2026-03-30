@@ -9,6 +9,7 @@ import {
   createMeal,
   findMealsByUser,
   findMealById,
+  updateNutritionResult,
   deleteMealById,
 } from "../services/meals.js";
 import { evaluateNutrition } from "../services/nutrition.js";
@@ -125,6 +126,34 @@ mealsRoute.get("/:id", async (c) => {
   }
 
   return c.json({ data: meal });
+});
+
+// PATCH /:id/nutrition — 栄養評価の訂正
+mealsRoute.patch("/:id/nutrition", async (c) => {
+  const user = c.get("user");
+  const meal = await findMealById(c.req.param("id"));
+
+  if (!meal || meal.user_id !== user.userId) {
+    return c.json({ error: "食事記録が見つかりません" }, 404);
+  }
+
+  const body = await c.req.json();
+  const schema = z.object({
+    foods: z.array(z.string()).optional(),
+    calories: z.number().min(0),
+    protein: z.number().min(0),
+    fat: z.number().min(0),
+    carbs: z.number().min(0),
+    comment: z.string().optional(),
+  });
+
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: "入力内容に誤りがあります" }, 400);
+  }
+
+  const updated = await updateNutritionResult(meal.id, parsed.data);
+  return c.json({ data: updated });
 });
 
 // DELETE /:id — 食事記録削除

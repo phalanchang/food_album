@@ -85,6 +85,22 @@ export async function findMealById(id: string): Promise<MealRow | null> {
   return result.rows[0] || null;
 }
 
+export async function updateNutritionResult(
+  id: string,
+  nutritionResult: unknown
+): Promise<MealRow> {
+  const result = await query(
+    `UPDATE meals
+     SET nutrition_result = $1,
+         nutrition_status = 'completed',
+         evaluated_at = NOW()
+     WHERE id = $2
+     RETURNING *`,
+    [JSON.stringify(nutritionResult), id]
+  );
+  return result.rows[0];
+}
+
 export async function deleteMealById(
   id: string
 ): Promise<{ photo_url: string } | null> {
