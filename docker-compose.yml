@@ -29,6 +29,7 @@ services:
       PORT: "3005"
     volumes:
       - ./backend/src:/app/src
+      - uploads:/app/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -50,3 +51,4 @@ services:
 
 volumes:
   pgdata:
+  uploads:

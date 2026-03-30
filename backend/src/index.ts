@@ -1,9 +1,14 @@
 import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import fs from "fs";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { authRoute } from "./routes/auth.js";
 import { healthRoute } from "./routes/health.js";
+import { mealsRoute } from "./routes/meals.js";
+
+fs.mkdirSync("/app/uploads", { recursive: true });
 
 const app = new Hono();
 
@@ -16,8 +21,11 @@ app.use(
   })
 );
 
+app.use("/uploads/*", serveStatic({ root: "/app" }));
+
 app.route("/api", healthRoute);
 app.route("/api/auth", authRoute);
+app.route("/api/meals", mealsRoute);
 
 const port = Number(process.env.PORT) || 3005;
 
