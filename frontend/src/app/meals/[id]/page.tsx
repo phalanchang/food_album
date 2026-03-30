@@ -5,8 +5,17 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { ja } from "date-fns/locale";
-import { ArrowLeft, Trash2, Coffee, Sun, Moon, Cookie } from "lucide-react";
+import { ArrowLeft, Trash2, Coffee, Sun, Moon, Cookie, Flame, Beef, Droplets, Wheat, Loader2 } from "lucide-react";
 import BottomNav from "../../components/bottom-nav";
+
+interface NutritionResult {
+  foods: string[];
+  calories: number;
+  protein: number;
+  fat: number;
+  carbs: number;
+  comment: string;
+}
 
 interface Meal {
   id: string;
@@ -14,6 +23,8 @@ interface Meal {
   meal_type: string;
   eaten_at: string;
   memo: string | null;
+  nutrition_status: string;
+  nutrition_result: NutritionResult | null;
   created_at: string;
 }
 
@@ -145,6 +156,68 @@ export default function MealDetailPage() {
         </div>
         {meal.memo && <p className="text-sm text-gray-700">{meal.memo}</p>}
       </div>
+
+      {/* 栄養評価 */}
+      {meal.nutrition_status === "pending" && (
+        <div className="mt-4 bg-white rounded-lg shadow-sm p-4 flex items-center gap-3 text-sm text-gray-500">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          栄養評価を分析中...
+        </div>
+      )}
+      {meal.nutrition_status === "completed" && meal.nutrition_result && (
+        <div className="mt-4 bg-white rounded-lg shadow-sm p-4 space-y-3">
+          <h3 className="text-sm font-bold text-gray-700">AI 栄養評価</h3>
+          {meal.nutrition_result.foods.length > 0 && (
+            <p className="text-sm text-gray-600">
+              {meal.nutrition_result.foods.join("、")}
+            </p>
+          )}
+          <div className="grid grid-cols-4 gap-2 text-center">
+            <div className="bg-red-50 rounded-lg p-2">
+              <Flame className="w-4 h-4 mx-auto text-red-400 mb-1" />
+              <p className="text-xs text-gray-500">カロリー</p>
+              <p className="text-sm font-bold text-gray-700">
+                {meal.nutrition_result.calories}
+              </p>
+              <p className="text-xs text-gray-400">kcal</p>
+            </div>
+            <div className="bg-orange-50 rounded-lg p-2">
+              <Beef className="w-4 h-4 mx-auto text-orange-400 mb-1" />
+              <p className="text-xs text-gray-500">タンパク質</p>
+              <p className="text-sm font-bold text-gray-700">
+                {meal.nutrition_result.protein}
+              </p>
+              <p className="text-xs text-gray-400">g</p>
+            </div>
+            <div className="bg-yellow-50 rounded-lg p-2">
+              <Droplets className="w-4 h-4 mx-auto text-yellow-500 mb-1" />
+              <p className="text-xs text-gray-500">脂質</p>
+              <p className="text-sm font-bold text-gray-700">
+                {meal.nutrition_result.fat}
+              </p>
+              <p className="text-xs text-gray-400">g</p>
+            </div>
+            <div className="bg-amber-50 rounded-lg p-2">
+              <Wheat className="w-4 h-4 mx-auto text-amber-500 mb-1" />
+              <p className="text-xs text-gray-500">炭水化物</p>
+              <p className="text-sm font-bold text-gray-700">
+                {meal.nutrition_result.carbs}
+              </p>
+              <p className="text-xs text-gray-400">g</p>
+            </div>
+          </div>
+          {meal.nutrition_result.comment && (
+            <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+              {meal.nutrition_result.comment}
+            </p>
+          )}
+        </div>
+      )}
+      {meal.nutrition_status === "failed" && (
+        <div className="mt-4 bg-white rounded-lg shadow-sm p-4 text-sm text-gray-400">
+          栄養評価を取得できませんでした
+        </div>
+      )}
 
       <button
         onClick={handleDelete}

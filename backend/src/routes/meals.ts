@@ -11,6 +11,7 @@ import {
   findMealById,
   deleteMealById,
 } from "../services/meals.js";
+import { evaluateNutrition } from "../services/nutrition.js";
 
 export const mealsRoute = new Hono();
 
@@ -84,6 +85,11 @@ mealsRoute.post("/", async (c) => {
     parsed.data.mealType,
     parsed.data.eatenAt,
     parsed.data.memo
+  );
+
+  // 非同期で栄養評価を実行（レスポンスをブロックしない）
+  evaluateNutrition(meal.id, meal.photo_url).catch((err) =>
+    console.error("Background nutrition evaluation error:", err)
   );
 
   return c.json({ data: meal }, 201);

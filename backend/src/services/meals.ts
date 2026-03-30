@@ -7,6 +7,9 @@ export interface MealRow {
   meal_type: string;
   eaten_at: string;
   memo: string | null;
+  nutrition_status: string;
+  nutrition_result: unknown;
+  evaluated_at: string | null;
   created_at: string;
   updated_at: string;
 }
