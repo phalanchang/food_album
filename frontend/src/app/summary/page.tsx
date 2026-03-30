@@ -151,15 +151,37 @@ export default function SummaryPage() {
       ) : summary ? (
         <>
           {/* カロリー合計 */}
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-4 text-center">
-            <Flame className="w-6 h-6 mx-auto text-red-400 mb-1" />
-            <p className="text-3xl font-bold text-gray-800">
-              {summary.totals.calories}
-            </p>
-            <p className="text-xs text-gray-400">
-              / {targets.calories} kcal（{summary.totals.mealCount}食）
-            </p>
-          </div>
+          {(() => {
+            const calPercent = Math.min(100, Math.round((summary.totals.calories / targets.calories) * 100));
+            return (
+              <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame className="w-5 h-5 text-red-400" />
+                  <span className="text-2xl font-bold text-gray-800">
+                    {summary.totals.calories}
+                  </span>
+                  <span className="text-sm text-gray-400">
+                    / {targets.calories} kcal
+                  </span>
+                  <span className="ml-auto text-sm font-medium text-orange-500">
+                    {calPercent}%
+                  </span>
+                </div>
+                <div className="h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
+                  <div
+                    className="h-full bg-red-400 rounded-full transition-all"
+                    style={{ width: `${calPercent}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400 text-center">
+                  {summary.totals.mealCount}食 記録済み
+                  {summary.totals.mealCount > 0 && (
+                    <span>（1食あたり約 {Math.round(summary.totals.calories / summary.totals.mealCount)} kcal）</span>
+                  )}
+                </p>
+              </div>
+            );
+          })()}
 
           {/* 栄養素バー */}
           <div className="bg-white rounded-lg shadow-sm p-4 space-y-3 mb-4">

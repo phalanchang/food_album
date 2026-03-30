@@ -45,7 +45,7 @@ export default function MealDetailPage() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [editForm, setEditForm] = useState({ foods: "", calories: 0, protein: 0, fat: 0, carbs: 0, comment: "" });
+  const [editForm, setEditForm] = useState({ foods: "", calories: 0, protein: 0, fat: 0, carbs: 0 });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -102,7 +102,6 @@ export default function MealDetailPage() {
       protein: meal.nutrition_result.protein,
       fat: meal.nutrition_result.fat,
       carbs: meal.nutrition_result.carbs,
-      comment: meal.nutrition_result.comment || "",
     });
     setEditing(true);
   };
@@ -120,7 +119,7 @@ export default function MealDetailPage() {
           protein: Number(editForm.protein),
           fat: Number(editForm.fat),
           carbs: Number(editForm.carbs),
-          comment: editForm.comment,
+          comment: meal?.nutrition_result?.comment || "",
         }),
       });
       if (res.ok) {
@@ -324,15 +323,6 @@ export default function MealDetailPage() {
               <input type="number" step="0.1" value={editForm.carbs} onChange={(e) => setEditForm({ ...editForm, carbs: Number(e.target.value) })}
                 className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400" />
             </div>
-          </div>
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">コメント</label>
-            <textarea
-              value={editForm.comment}
-              onChange={(e) => setEditForm({ ...editForm, comment: e.target.value })}
-              rows={2}
-              className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-            />
           </div>
         </div>
       )}
