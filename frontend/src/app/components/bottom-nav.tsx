@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, PlusCircle, User } from "lucide-react";
+import { Home, Calendar, PlusCircle, User } from "lucide-react";
 
 const tabs = [
   { label: "ホーム", icon: Home, href: "/" },
+  { label: "カレンダー", icon: Calendar, href: "/calendar" },
   { label: "投稿", icon: PlusCircle, href: "/meals/new" },
   { label: "マイページ", icon: User, href: "#" },
 ];
