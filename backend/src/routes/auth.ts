@@ -15,7 +15,7 @@ export const authRoute = new Hono();
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.COOKIE_SECURE === "true",
   sameSite: "Lax" as const,
   path: "/",
   maxAge: 60 * 60 * 24 * 7, // 7 days
