@@ -9,6 +9,7 @@ import NutritionBar from "../components/nutrition-bar";
 import BottomNav from "../components/bottom-nav";
 import AppHeader from "../components/app-header";
 import Recommendations from "./recommendations";
+import AiReview from "../components/ai-review";
 
 type Period = "daily" | "weekly" | "monthly";
 
@@ -250,6 +251,11 @@ export default function SummaryPage() {
                 この期間の栄養評価データはありません
               </p>
             </div>
+          )}
+
+          {/* AI総評 */}
+          {summary.totals.mealCount > 0 && (
+            <AiReview key={`review-${period}-${dateStr}`} period={period} date={dateStr} />
           )}
 
           {/* 献立レコメンド */}

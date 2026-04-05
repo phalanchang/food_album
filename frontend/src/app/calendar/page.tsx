@@ -8,6 +8,7 @@ import { Calendar, Flame } from "lucide-react";
 import CalendarView from "../components/calendar-view";
 import MealCard from "../components/meal-card";
 import NutritionBar from "../components/nutrition-bar";
+import AiReview from "../components/ai-review";
 import BottomNav from "../components/bottom-nav";
 import AppHeader from "../components/app-header";
 
@@ -219,6 +220,17 @@ export default function CalendarPage() {
               )}
             </div>
           ) : null}
+
+          {/* AI総評 */}
+          {dailySummary && dailySummary.totals.mealCount > 0 && (
+            <div className="mb-4">
+              <AiReview
+                key={`review-${selectedDate.toISOString().split("T")[0]}`}
+                period="daily"
+                date={selectedDate.toISOString().split("T")[0]}
+              />
+            </div>
+          )}
 
           {/* 食事カード一覧 */}
           {selectedMeals.length === 0 ? (
