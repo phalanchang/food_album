@@ -23,6 +23,7 @@ function getDefaultDateTime() {
 export default function NewMealPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [mealType, setMealType] = useState("lunch");
@@ -90,11 +91,10 @@ export default function NewMealPage() {
       <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
         {/* 写真選択 */}
         <div
-          onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-2xl overflow-hidden cursor-pointer transition-all ${
+          className={`relative w-full rounded-2xl overflow-hidden transition-all ${
             preview
               ? "h-56 shadow-lg"
-              : "h-44 border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/30 bg-gray-50"
+              : "h-44 border-2 border-dashed border-gray-200 bg-gray-50"
           }`}
         >
           {preview ? (
@@ -104,26 +104,59 @@ export default function NewMealPage() {
                 alt="プレビュー"
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
-                <span className="opacity-0 hover:opacity-100 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity">
-                  写真を変更
-                </span>
+              <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex items-center gap-1.5 text-xs font-medium text-white bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm active:scale-95 transition-all"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  撮り直す
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-1.5 text-xs font-medium text-white bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm active:scale-95 transition-all"
+                >
+                  <ImagePlus className="w-3.5 h-3.5" />
+                  写真から選ぶ
+                </button>
               </div>
             </>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-3">
-                <ImagePlus className="w-7 h-7 text-orange-400" />
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => cameraInputRef.current?.click()}
+                  className="flex flex-col items-center gap-2 px-5 py-3 rounded-xl bg-orange-100 hover:bg-orange-200 active:scale-95 transition-all"
+                >
+                  <Camera className="w-7 h-7 text-orange-500" />
+                  <span className="text-xs font-medium text-orange-600">カメラで撮影</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center gap-2 px-5 py-3 rounded-xl bg-blue-50 hover:bg-blue-100 active:scale-95 transition-all"
+                >
+                  <ImagePlus className="w-7 h-7 text-blue-400" />
+                  <span className="text-xs font-medium text-blue-500">写真から選ぶ</span>
+                </button>
               </div>
-              <p className="text-sm font-medium text-gray-500">タップして写真を選択</p>
-              <p className="text-xs text-gray-400 mt-1">カメラで撮影もできます</p>
             </div>
           )}
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handlePhotoChange}
+            className="hidden"
+          />
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={handlePhotoChange}
             className="hidden"
           />
