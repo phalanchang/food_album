@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Camera, ImagePlus } from "lucide-react";
+import exifr from "exifr";
 import Link from "next/link";
 import BottomNav from "../../components/bottom-nav";
 import AppHeader from "../../components/app-header";
@@ -38,12 +39,37 @@ export default function NewMealPage() {
     };
   }, [preview]);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function toLocalDateTimeString(date: Date) {
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
+  }
+
+  function guesssMealType(date: Date) {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 10) return "breakfast";
+    if (hour >= 10 && hour < 15) return "lunch";
+    if (hour >= 15 && hour < 21) return "dinner";
+    return "snack";
+  }
+
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (preview) URL.revokeObjectURL(preview);
     setPhoto(file);
     setPreview(URL.createObjectURL(file));
+
+    try {
+      const exif = await exifr.parse(file, ["DateTimeOriginal"]);
+      if (exif?.DateTimeOriginal) {
+        const taken = new Date(exif.DateTimeOriginal);
+        setEatenAt(toLocalDateTimeString(taken));
+        setMealType(guesssMealType(taken));
+      }
+    } catch {
+      // EXIFが読めない場合は現在の値をそのまま維持
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
