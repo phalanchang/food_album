@@ -5,9 +5,11 @@ import { setCookie } from "hono/cookie";
 import {
   createUser,
   findUserByEmail,
+  findUserById,
   generateToken,
   verifyPassword,
 } from "../services/auth.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 export const authRoute = new Hono();
 
@@ -107,3 +109,20 @@ authRoute.post(
     });
   }
 );
+
+// GET /me — 現在のログインユーザー情報
+authRoute.get("/me", authMiddleware, async (c) => {
+  const { userId } = c.get("user");
+  const user = await findUserById(userId);
+  if (!user) {
+    return c.json({ error: "ユーザーが見つかりません" }, 404);
+  }
+  return c.json({
+    data: {
+      id: user.id,
+      email: user.email,
+      displayName: user.display_name,
+      avatarUrl: user.avatar_url,
+    },
+  });
+});

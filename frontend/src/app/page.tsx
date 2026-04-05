@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { UtensilsCrossed } from "lucide-react";
+import { UtensilsCrossed, Camera } from "lucide-react";
 import MealCard from "./components/meal-card";
 import BottomNav from "./components/bottom-nav";
+import AppHeader from "./components/app-header";
 
 interface Meal {
   id: string;
@@ -58,17 +59,18 @@ export default function Home() {
 
   if (loading) {
     return (
-      <main className="max-w-md mx-auto p-4 pb-20">
-        <header className="flex items-center gap-2 mb-4">
-          <h1 className="text-lg font-bold">Food Album</h1>
-        </header>
+      <main className="max-w-md mx-auto p-4 pb-safe">
+        <AppHeader
+          title="Food Album"
+          icon={<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm shadow-orange-200"><UtensilsCrossed className="w-4 h-4 text-white" /></div>}
+        />
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-lg shadow-sm overflow-hidden animate-pulse">
-              <div className="w-full h-48 bg-gray-200" />
-              <div className="p-3 space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/3" />
-                <div className="h-3 bg-gray-200 rounded w-2/3" />
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+              <div className="w-full h-48 skeleton" />
+              <div className="p-3.5 space-y-2">
+                <div className="h-4 skeleton rounded-lg w-1/3" />
+                <div className="h-3 skeleton rounded-lg w-2/3" />
               </div>
             </div>
           ))}
@@ -79,35 +81,41 @@ export default function Home() {
   }
 
   return (
-    <main className="max-w-md mx-auto p-4 pb-20">
-      <header className="flex items-center gap-2 mb-4">
-        <h1 className="text-lg font-bold">Food Album</h1>
-      </header>
+    <main className="max-w-md mx-auto p-4 pb-safe">
+      <AppHeader
+        title="Food Album"
+        icon={<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-sm shadow-orange-200"><UtensilsCrossed className="w-4 h-4 text-white" /></div>}
+      />
 
       {meals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-          <UtensilsCrossed className="w-12 h-12 mb-3" />
-          <p className="mb-4">まだ食事記録がありません</p>
+        <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+          <div className="w-20 h-20 rounded-full bg-orange-50 flex items-center justify-center mb-4">
+            <Camera className="w-10 h-10 text-orange-300" />
+          </div>
+          <p className="text-gray-500 mb-1 font-medium">まだ食事記録がありません</p>
+          <p className="text-sm text-gray-400 mb-6">最初の一枚を撮影してみましょう</p>
           <Link
             href="/meals/new"
-            className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all shadow-md shadow-orange-200 active:scale-[0.98]"
           >
-            最初の食事を記録する
+            食事を記録する
           </Link>
         </div>
       ) : (
         <>
           <div className="space-y-4">
-            {meals.map((meal) => (
-              <MealCard key={meal.id} meal={meal} />
+            {meals.map((meal, i) => (
+              <div key={meal.id} className={`animate-fade-in delay-${Math.min(i + 1, 5)}`}>
+                <MealCard meal={meal} />
+              </div>
             ))}
           </div>
           {meals.length < total && (
-            <div className="mt-4 text-center">
+            <div className="mt-6 text-center">
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="px-4 py-2 text-sm text-orange-500 border border-orange-500 rounded-lg hover:bg-orange-50 disabled:opacity-50 transition-colors"
+                className="px-6 py-2.5 text-sm font-semibold text-orange-500 bg-orange-50 border border-orange-200 rounded-xl hover:bg-orange-100 disabled:opacity-50 transition-all active:scale-[0.98]"
               >
                 {loadingMore ? "読み込み中..." : "もっと見る"}
               </button>

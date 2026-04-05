@@ -62,33 +62,33 @@ export default function CalendarView({
   };
 
   return (
-    <div>
+    <div className="animate-fade-in">
       {/* 月ナビゲーション */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => onMonthChange(subMonths(currentMonth, 1))}
-          className="p-1 text-gray-500 hover:text-gray-700"
+          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <h2 className="text-base font-bold">
+        <h2 className="text-base font-bold text-gray-800">
           {format(currentMonth, "yyyy年M月", { locale: ja })}
         </h2>
         <button
           onClick={() => onMonthChange(addMonths(currentMonth, 1))}
-          className="p-1 text-gray-500 hover:text-gray-700"
+          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all active:scale-95"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
       {/* 曜日ヘッダー */}
-      <div className="grid grid-cols-7 mb-1">
+      <div className="grid grid-cols-7 mb-2">
         {weekDays.map((d, i) => (
           <div
             key={d}
-            className={`text-center text-xs font-medium py-1 ${
-              i === 0 ? "text-red-400" : i === 6 ? "text-blue-400" : "text-gray-500"
+            className={`text-center text-xs font-semibold py-2 ${
+              i === 0 ? "text-red-400" : i === 6 ? "text-blue-400" : "text-gray-400"
             }`}
           >
             {d}
@@ -97,7 +97,7 @@ export default function CalendarView({
       </div>
 
       {/* カレンダーグリッド */}
-      <div className="grid grid-cols-7 gap-px bg-gray-100 rounded-lg overflow-hidden">
+      <div className="grid grid-cols-7 gap-0.5 bg-gray-100/50 rounded-2xl overflow-hidden border border-gray-100">
         {days.map((day) => {
           const inMonth = isSameMonth(day, currentMonth);
           const selected = selectedDate && isSameDay(day, selectedDate);
@@ -108,23 +108,25 @@ export default function CalendarView({
             <button
               key={day.toISOString()}
               onClick={() => onDateSelect(day)}
-              className={`flex flex-col items-center py-2 min-h-[3rem] ${
-                inMonth ? "bg-white" : "bg-gray-50"
-              } ${selected ? "ring-2 ring-inset ring-orange-400" : ""}`}
+              className={`flex flex-col items-center py-2.5 min-h-[3.25rem] transition-all ${
+                inMonth ? "bg-white" : "bg-gray-50/50"
+              } ${selected ? "bg-orange-50 ring-2 ring-inset ring-orange-400" : "hover:bg-gray-50"}`}
             >
               <span
-                className={`text-xs leading-none ${
+                className={`text-xs leading-none font-medium ${
                   !inMonth
                     ? "text-gray-300"
                     : today
-                      ? "bg-orange-500 text-white rounded-full w-5 h-5 flex items-center justify-center"
-                      : "text-gray-700"
+                      ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-[11px] font-bold shadow-sm shadow-orange-200"
+                      : selected
+                        ? "text-orange-600 font-bold"
+                        : "text-gray-700"
                 }`}
               >
                 {format(day, "d")}
               </span>
               {mealTypes.length > 0 && (
-                <div className="flex gap-0.5 mt-1">
+                <div className="flex gap-0.5 mt-1.5">
                   {mealTypes.map((t) => (
                     <span
                       key={t}

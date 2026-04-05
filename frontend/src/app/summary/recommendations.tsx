@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Lightbulb, ChefHat, Loader2 } from "lucide-react";
+import { Lightbulb, ChefHat, Loader2, Sparkles } from "lucide-react";
 
 interface Recommendation {
   ingredient: string;
@@ -46,11 +46,11 @@ export default function Recommendations({ period, date }: Props) {
 
   if (!loaded) {
     return (
-      <div className="mt-4">
+      <div>
         <button
           onClick={fetchRecommendations}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 py-3 bg-green-500 text-white font-medium rounded-lg hover:bg-green-600 disabled:opacity-50 transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white font-semibold rounded-xl hover:from-emerald-600 hover:to-green-700 disabled:opacity-50 transition-all shadow-md shadow-green-200 active:scale-[0.98]"
         >
           {loading ? (
             <>
@@ -59,7 +59,7 @@ export default function Recommendations({ period, date }: Props) {
             </>
           ) : (
             <>
-              <Lightbulb className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" />
               献立提案を見る
             </>
           )}
@@ -73,25 +73,30 @@ export default function Recommendations({ period, date }: Props) {
 
   if (recommendations.length === 0) {
     return (
-      <div className="mt-4 bg-white rounded-lg shadow-sm p-4 text-sm text-gray-400 text-center">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 text-sm text-gray-400 text-center">
         提案を生成できませんでした
       </div>
     );
   }
 
   return (
-    <div className="mt-4 space-y-3">
-      <h3 className="text-sm font-bold text-gray-700 flex items-center gap-1">
-        <ChefHat className="w-4 h-4" />
+    <div className="space-y-3 animate-slide-up">
+      <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+        <ChefHat className="w-4 h-4 text-green-500" />
         おすすめ献立
       </h3>
       {recommendations.map((rec, i) => (
-        <div key={i} className="bg-white rounded-lg shadow-sm p-4 space-y-1">
-          <p className="font-medium text-gray-800">{rec.ingredient}</p>
-          <p className="text-xs text-gray-500">{rec.reason}</p>
-          <p className="text-sm text-gray-600 bg-gray-50 rounded p-2 mt-2">
-            {rec.recipe}
+        <div key={i} className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-2 animate-fade-in delay-${Math.min(i + 1, 5)}`}>
+          <p className="font-semibold text-gray-800 flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs font-bold">
+              {i + 1}
+            </span>
+            {rec.ingredient}
           </p>
+          <p className="text-xs text-gray-500 pl-8">{rec.reason}</p>
+          <div className="bg-gradient-to-br from-gray-50 to-green-50/30 rounded-xl p-3 ml-8 border border-gray-100">
+            <p className="text-sm text-gray-600 leading-relaxed">{rec.recipe}</p>
+          </div>
         </div>
       ))}
     </div>

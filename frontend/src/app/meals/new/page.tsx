@@ -2,15 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Camera } from "lucide-react";
+import { ArrowLeft, Camera, ImagePlus } from "lucide-react";
 import Link from "next/link";
 import BottomNav from "../../components/bottom-nav";
+import AppHeader from "../../components/app-header";
 
 const mealTypes = [
-  { value: "breakfast", label: "朝食" },
-  { value: "lunch", label: "昼食" },
-  { value: "dinner", label: "夕食" },
-  { value: "snack", label: "間食" },
+  { value: "breakfast", label: "朝食", emoji: "☀️" },
+  { value: "lunch", label: "昼食", emoji: "🌤" },
+  { value: "dinner", label: "夕食", emoji: "🌙" },
+  { value: "snack", label: "間食", emoji: "🍪" },
 ] as const;
 
 function getDefaultDateTime() {
@@ -83,31 +84,40 @@ export default function NewMealPage() {
   };
 
   return (
-    <main className="max-w-md mx-auto p-4 pb-20">
-      <header className="flex items-center gap-3 mb-4">
-        <Link href="/" className="text-gray-600">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <h1 className="text-lg font-bold">食事を記録</h1>
-      </header>
+    <main className="max-w-md mx-auto p-4 pb-safe">
+      <AppHeader title="食事を記録" backHref="/" />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
         {/* 写真選択 */}
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="relative w-full h-52 rounded-lg border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer overflow-hidden hover:border-orange-400 transition-colors"
+          className={`relative w-full rounded-2xl overflow-hidden cursor-pointer transition-all ${
+            preview
+              ? "h-56 shadow-lg"
+              : "h-44 border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/30 bg-gray-50"
+          }`}
         >
           {preview ? (
-            <img
-              src={preview}
-              alt="プレビュー"
-              className="w-full h-full object-cover"
-            />
-          ) : (
             <>
-              <Camera className="w-8 h-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-400">写真を選択</p>
+              <img
+                src={preview}
+                alt="プレビュー"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors flex items-center justify-center">
+                <span className="opacity-0 hover:opacity-100 text-white text-sm font-medium bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm transition-opacity">
+                  写真を変更
+                </span>
+              </div>
             </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-3">
+                <ImagePlus className="w-7 h-7 text-orange-400" />
+              </div>
+              <p className="text-sm font-medium text-gray-500">タップして写真を選択</p>
+              <p className="text-xs text-gray-400 mt-1">カメラで撮影もできます</p>
+            </div>
           )}
           <input
             ref={fileInputRef}
@@ -121,7 +131,7 @@ export default function NewMealPage() {
 
         {/* 食事タイプ */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2.5">
             食事タイプ
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -130,13 +140,14 @@ export default function NewMealPage() {
                 key={t.value}
                 type="button"
                 onClick={() => setMealType(t.value)}
-                className={`py-2 text-sm rounded-lg border transition-colors ${
+                className={`flex flex-col items-center gap-1 py-2.5 text-sm rounded-xl border-2 transition-all active:scale-[0.97] ${
                   mealType === t.value
-                    ? "bg-orange-500 text-white border-orange-500"
-                    : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
+                    ? "bg-orange-50 text-orange-600 border-orange-400 font-semibold shadow-sm shadow-orange-100"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                 }`}
               >
-                {t.label}
+                <span className="text-base">{t.emoji}</span>
+                <span className="text-xs">{t.label}</span>
               </button>
             ))}
           </div>
@@ -144,34 +155,34 @@ export default function NewMealPage() {
 
         {/* 日時 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
             日時
           </label>
           <input
             type="datetime-local"
             value={eatenAt}
             onChange={(e) => setEatenAt(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent focus:bg-white transition-all"
           />
         </div>
 
         {/* メモ */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-semibold text-gray-700 mb-1.5">
             メモ
           </label>
           <textarea
             value={memo}
             onChange={(e) => setMemo(e.target.value)}
-            placeholder="メモ（任意）"
+            placeholder="今日のランチは美味しかった..."
             maxLength={500}
             rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
+            className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent focus:bg-white transition-all resize-none"
           />
         </div>
 
         {error && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
+          <div className="text-sm text-red-600 bg-red-50 p-3.5 rounded-xl border border-red-100 animate-fade-in">
             {error}
           </div>
         )}
@@ -179,7 +190,7 @@ export default function NewMealPage() {
         <button
           type="submit"
           disabled={loading || !photo}
-          className="w-full py-3 bg-orange-500 text-white font-medium rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-md shadow-orange-200 hover:shadow-lg hover:shadow-orange-300 active:scale-[0.98]"
         >
           {loading ? "記録中..." : "記録する"}
         </button>

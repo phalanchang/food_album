@@ -41,6 +41,21 @@ export async function createUser(
   return result.rows[0];
 }
 
+export async function findUserById(
+  id: string
+): Promise<{
+  id: string;
+  email: string;
+  display_name: string;
+  avatar_url: string | null;
+} | null> {
+  const result = await query(
+    `SELECT id, email, display_name, avatar_url FROM users WHERE id = $1`,
+    [id]
+  );
+  return result.rows[0] || null;
+}
+
 export async function findUserByEmail(
   email: string
 ): Promise<{

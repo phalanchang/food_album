@@ -12,7 +12,7 @@ import {
   updateNutritionResult,
   deleteMealById,
 } from "../services/meals.js";
-import { evaluateNutrition } from "../services/nutrition.js";
+import { evaluateNutrition, reevaluateNutritionByFoods } from "../services/nutrition.js";
 
 export const mealsRoute = new Hono();
 
@@ -154,6 +154,35 @@ mealsRoute.patch("/:id/nutrition", async (c) => {
 
   const updated = await updateNutritionResult(meal.id, parsed.data);
   return c.json({ data: updated });
+});
+
+// POST /:id/nutrition/reevaluate — 食品名ベースで栄養を再評価
+mealsRoute.post("/:id/nutrition/reevaluate", async (c) => {
+  const user = c.get("user");
+  const meal = await findMealById(c.req.param("id"));
+
+  if (!meal || meal.user_id !== user.userId) {
+    return c.json({ error: "食事記録が見つかりません" }, 404);
+  }
+
+  const body = await c.req.json();
+  const schema = z.object({
+    foods: z.array(z.string().min(1)).min(1, "食品名を1つ以上指定してください"),
+  });
+
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) {
+    return c.json({ error: "食品名を1つ以上指定してください" }, 400);
+  }
+
+  try {
+    const result = await reevaluateNutritionByFoods(meal.id, parsed.data.foods);
+    const updated = await findMealById(meal.id);
+    return c.json({ data: updated });
+  } catch (err) {
+    console.error("[Reevaluate] Error:", err);
+    return c.json({ error: "栄養評価に失敗しました" }, 500);
+  }
 });
 
 // DELETE /:id — 食事記録削除
