@@ -79,7 +79,7 @@ export default function SummaryPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/summaries?period=${p}&date=${d.toISOString()}`,
+        `/api/summaries?period=${p}&date=${format(d, "yyyy-MM-dd")}`,
         { credentials: "include" }
       );
       if (res.status === 401) {
@@ -100,7 +100,8 @@ export default function SummaryPage() {
   }, [period, date]);
 
   const targets = getTargets(period);
-  const dateStr = date.toISOString().split("T")[0];
+  // ローカルタイムゾーンの日付文字列を使う（UTCだと日付がずれる）
+  const dateStr = format(date, "yyyy-MM-dd");
 
   return (
     <main className="max-w-md mx-auto p-4 pb-safe">

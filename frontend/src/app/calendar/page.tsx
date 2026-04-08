@@ -91,7 +91,7 @@ export default function CalendarPage() {
     setDailySummary(null);
     try {
       const res = await fetch(
-        `/api/summaries?period=daily&date=${d.toISOString()}`,
+        `/api/summaries?period=daily&date=${format(d, "yyyy-MM-dd")}`,
         { credentials: "include" }
       );
       if (res.ok) {
@@ -225,9 +225,9 @@ export default function CalendarPage() {
           {dailySummary && dailySummary.totals.mealCount > 0 && (
             <div className="mb-4">
               <AiReview
-                key={`review-${selectedDate.toISOString().split("T")[0]}`}
+                key={`review-${format(selectedDate, "yyyy-MM-dd")}`}
                 period="daily"
-                date={selectedDate.toISOString().split("T")[0]}
+                date={format(selectedDate, "yyyy-MM-dd")}
               />
             </div>
           )}
